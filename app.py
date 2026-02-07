@@ -4,138 +4,117 @@ import random
 import pandas as pd
 from datetime import datetime
 
-# 1. CONFIGURACIÓN Y ESTILO
-st.set_page_config(page_title="Ludoteca Nacional | Pro", page_icon="🏟️", layout="wide")
+# 1. CONFIGURACIÓN Y ESTILO AVANZADO
+st.set_page_config(page_title="Ludoteca Nacional Pro", page_icon="📈", layout="wide")
 
-# Inicializar la bitácora en la memoria de la sesión si no existe
 if 'bitacora' not in st.session_state:
     st.session_state.bitacora = []
 
 st.markdown("""
     <style>
-    .main { background-color: #0d1117; color: white; }
-    .gadget-box {
-        background: linear-gradient(145deg, #161b22, #0d1117);
-        border: 1px solid #30363d;
-        border-radius: 12px;
-        padding: 20px;
-        text-align: center;
-        box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+    [data-testid="stAppViewContainer"] { background-color: #0d1117; }
+    .stMetric { background: #161b22; border: 1px solid #30363d; padding: 15px; border-radius: 10px; }
+    .stTabs [data-baseweb="tab-list"] { gap: 8px; }
+    .stTabs [data-baseweb="tab"] {
+        background-color: #161b22; border-radius: 4px 4px 0px 0px; color: white; padding: 10px 20px;
     }
-    .metric-value { color: #00ffcc; font-size: 28px; font-weight: bold; font-family: 'Courier New', monospace; }
-    .status-online { color: #3fb950; font-size: 14px; animation: blinker 2s linear infinite; }
-    @keyframes blinker { 50% { opacity: 0; } }
-    .match-card {
-        background: #1c2128;
-        border-radius: 10px;
-        padding: 15px;
-        margin-bottom: 12px;
-        border-left: 4px solid #00ffcc;
+    .stTabs [aria-selected="true"] { border-bottom: 2px solid #00ffcc !important; }
+    .jugada-card {
+        background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 12px; margin-bottom: 20px;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. ENCABEZADO
-st.markdown("""
-    <div style="background-color: #161b22; padding: 15px; border-radius: 10px; border-bottom: 3px solid #00ffcc; margin-bottom: 25px; text-align: center;">
-        <h1 style="margin: 0; color: #f0f6fc; letter-spacing: 3px;">🏟️ LUDOTECA NACIONAL</h1>
-        <span class="status-online">● TERMINAL DE INTELIGENCIA ESTRATÉGICA</span>
-    </div>
-    """, unsafe_allow_html=True)
+# 2. HEADER PROFESIONAL
+col_h1, col_h2 = st.columns([3, 1])
+with col_h1:
+    st.title("📈 LUDOTECA NACIONAL")
+    st.caption("Sistema de Gestión de Riesgo y Análisis de Mercados Deportivos")
+with col_h2:
+    st.write(f"**Status:** 🟢 Online \n\n **Fecha:** {datetime.now().strftime('%d/%m/%Y')}")
 
-# 3. GADGETS SUPERIORES
-col_a, col_b, col_c, col_d = st.columns(4)
-with col_a:
-    st.markdown(f'<div class="gadget-box"><small>VOLUMEN MERCADO</small><br><span class="metric-value">2.1M</span><br><small style="color:#8b949e;">USD 24H</small></div>', unsafe_allow_html=True)
-with col_b:
-    st.markdown(f'<div class="gadget-box"><small>PARTIDOS HOY</small><br><span class="metric-value">18</span><br><small style="color:#8b949e;">Ligas Activas</small></div>', unsafe_allow_html=True)
-with col_c:
-    st.markdown(f'<div class="gadget-box"><small>EFICIENCIA</small><br><span class="metric-value" style="color:#00ffcc;">68%</span><br><small style="color:#8b949e;">Algoritmo v5</small></div>', unsafe_allow_html=True)
-with col_d:
-    st.markdown(f'<div class="gadget-box"><small>HORA LOCAL</small><br><span class="metric-value">{datetime.now().strftime("%H:%M")}</span><br><small style="color:#8b949e;">Sync Global</small></div>', unsafe_allow_html=True)
+st.divider()
 
-st.write("---")
+# 3. CUERPO DE LA APP
+tab_mercado, tab_calculadora, tab_analisis = st.tabs(["📡 MERCADO REAL", "🧮 SMART CALCULATOR", "📊 PERFORMANCE"])
 
-# 4. PESTAÑAS
-tab_live, tab_betting, tab_history = st.tabs(["🔥 MERCADO", "🧮 CÁLCULO & VALOR", "📝 BITÁCORA DE SESIÓN"])
-
-with tab_live:
-    col_m, col_s = st.columns([2, 1])
-    with col_m:
-        st.subheader("📡 Feed de Partidos Real-Time")
-        token = "f28172446a1a46aeb16a4ab8c2311fa4"
-        headers = {'X-Auth-Token': token}
-        liga = st.selectbox("Mercado:", ["Premier League", "La Liga", "Champions League", "Serie A"])
-        cods = {"Premier League": "PL", "La Liga": "PD", "Champions League": "CL", "Serie A": "SA"}
-        
-        if st.button("ACTUALIZAR CARTELERA"):
-            url = f"https://api.football-data.org/v4/competitions/{cods[liga]}/matches"
-            res = requests.get(url, headers=headers)
-            if res.status_code == 200:
-                matches = res.json().get('matches', [])[:6]
-                for m in matches:
-                    st.markdown(f"""<div class="match-card">
-                        <small>{m['utcDate'][:10]}</small><br>
-                        <b>{m['homeTeam']['name']} vs {m['awayTeam']['name']}</b>
-                    </div>""", unsafe_allow_html=True)
-
-    with col_s:
-        st.subheader("🔍 Smart Tips")
-        st.info("El algoritmo detecta alta probabilidad de goles en la Premier League hoy.")
-        st.write("Presión de Venta:")
-        st.progress(random.randint(20, 80))
-
-with tab_betting:
-    st.subheader("⚙️ Análisis de Valor")
-    c1, c2 = st.columns(2)
+with tab_mercado:
+    st.subheader("Eventos Sugeridos del Día")
+    token = "f28172446a1a46aeb16a4ab8c2311fa4"
+    headers = {'X-Auth-Token': token}
+    liga = st.selectbox("Cambiar Mercado:", ["Premier League", "La Liga", "Champions League"])
+    cods = {"Premier League": "PL", "La Liga": "PD", "Champions League": "CL"}
     
-    with c1:
-        st.write("### Calculadora de Entrada")
-        nombre_jugada = st.text_input("Etiqueta de la jugada (Ej: Real Madrid ML)", "Nueva Jugada")
-        bet_amt = st.number_input("Inversión ($)", value=100.0)
-        odd_val = st.number_input("Momio Decimal", value=2.00, step=0.05)
+    if st.button("Sincronizar API"):
+        url = f"https://api.football-data.org/v4/competitions/{cods[liga]}/matches"
+        res = requests.get(url, headers=headers)
+        if res.status_code == 200:
+            matches = res.json().get('matches', [])[:5]
+            for m in matches:
+                with st.container():
+                    st.markdown(f"""<div style='background:#1c2128; padding:10px; border-radius:5px; margin-bottom:5px;'>
+                    <b>{m['homeTeam']['name']} vs {m['awayTeam']['name']}</b><br><small>{m['utcDate'][:10]}</small></div>""", unsafe_allow_html=True)
+
+with tab_calculadora:
+    col_izq, col_der = st.columns([1, 1])
+    
+    with col_izq:
+        st.markdown('<div class="jugada-card">', unsafe_allow_html=True)
+        st.write("### Definir Jugada")
+        nombre = st.text_input("Nombre del Pick:", "Ej: Manchester City ML")
+        monto = st.number_input("Inversión ($):", min_value=1.0, value=100.0)
+        momio = st.number_input("Momio:", min_value=1.01, value=1.90, step=0.05)
         
-        # Lógica del Semáforo
-        prob_implicita = (1 / odd_val) * 100
-        prob_real = st.slider("Tu probabilidad estimada (%)", 10, 90, 50)
+        # Lógica de Valor
+        prob_est = st.slider("Tu Confianza (%):", 5, 95, 50)
+        prob_imp = (1 / momio) * 100
+        valor = prob_est - prob_imp
         
-        st.write(f"Probabilidad Implicada del Momio: **{prob_implicita:.1f}%**")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col_der:
+        total = monto * momio
+        utilidad = total - monto
+        st.metric("Cobro Potencial", f"${total:.2f}", f"+${utilidad:.2f} Neto")
         
-        if prob_real > prob_implicita:
-            st.success(f"🟢 VALOR DETECTADO: Tienes un ventaja del {(prob_real - prob_implicita):.1f}%")
-        elif abs(prob_real - prob_implicita) < 5:
-            st.warning("🟡 RIESGO EQUILIBRADO: El momio es justo.")
+        if valor > 0:
+            st.success(f"🔥 VALOR POSITIVO: +{valor:.1f}% de ventaja.")
         else:
-            st.error("🔴 SIN VALOR: El riesgo es mayor al pago.")
+            st.error(f"⚠️ RIESGO ALTO: {valor:.1f}% debajo del valor.")
 
-    with c2:
-        st.write("### Retorno Esperado")
-        ganancia = bet_amt * odd_val
-        st.metric("Total a Cobrar", f"${ganancia:.2f}", f"+${ganancia-bet_amt:.2f}")
-        
-        if st.button("📥 REGISTRAR EN BITÁCORA"):
-            nueva_fila = {
-                "Hora": datetime.now().strftime("%H:%M:%S"),
-                "Jugada": nombre_jugada,
-                "Inversión": f"${bet_amt:.2f}",
-                "Momio": odd_val,
-                "Cobro Potencial": f"${ganancia:.2f}",
-                "Ventaja": f"{(prob_real - prob_implicita):.1f}%"
-            }
-            st.session_state.bitacora.append(nueva_fila)
-            st.balloons()
-            st.toast("¡Jugada guardada en la bitácora!")
+        if st.button("💾 REGISTRAR Y COPIAR"):
+            resumen = f"📌 PICK: {nombre} | Momio: {momio} | Inversión: ${monto} | Cobro: ${total:.2f}"
+            st.session_state.bitacora.append({
+                "Fecha": datetime.now().strftime("%H:%M"),
+                "Evento": nombre,
+                "Inversión": monto,
+                "Momio": momio,
+                "Ganancia_Pot": utilidad
+            })
+            st.code(resumen, language="text")
+            st.toast("Copiado al portapapeles y guardado")
 
-with tab_history:
-    st.subheader("📝 Registro de Sesión (Hoy)")
+with tab_analisis:
+    st.subheader("Estadísticas de la Sesión")
     if st.session_state.bitacora:
         df = pd.DataFrame(st.session_state.bitacora)
-        st.table(df)
-        if st.button("Limpiar Bitácora"):
+        
+        col_res1, col_res2 = st.columns(2)
+        with col_res1:
+            st.write("#### Crecimiento de Cartera (Simulado)")
+            # Gráfica de área para ver la proyección
+            df['Acumulado'] = df['Ganancia_Pot'].cumsum()
+            st.area_chart(df, x="Fecha", y="Acumulado", color="#00ffcc")
+        
+        with col_res2:
+            st.write("#### Tabla de Registro")
+            st.dataframe(df[["Fecha", "Evento", "Inversión", "Momio"]], use_container_width=True)
+        
+        if st.button("🗑️ Reiniciar Sesión"):
             st.session_state.bitacora = []
             st.rerun()
     else:
-        st.write("Aún no has registrado jugadas en esta sesión.")
+        st.info("Registra tu primera jugada para ver el análisis visual.")
 
-st.write("---")
-st.caption(f"Ludoteca Nacional v5.0 | {datetime.now().strftime('%Y-%m-%d')} | Terminal Protegida")
+st.divider()
+st.caption("Ludoteca Nacional v6.0 | Desarrollado para William Tabares")
