@@ -17,6 +17,7 @@ st.markdown("""
     .jugada-card {
         background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 12px; margin-bottom: 20px;
     }
+    iframe { border-radius: 10px; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -31,30 +32,25 @@ tab_mercado, tab_calculadora, tab_analisis = st.tabs(["📡 MARCADORES EN VIVO",
 with tab_mercado:
     st.subheader("Marcadores en Tiempo Real")
     
-    # --- FIX MAESTRO PARA EL WIDGET ---
-    # Usamos el formato de Widget 2.0 que es más compatible con Streamlit
+    # --- WIDGET CORREGIDO (ZONA HORARIA ESTÁNDAR) ---
     api_sports_html = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <script type="module" src="https://widgets.api-sports.io/2.0.3/widgets.js"></script>
-    </head>
-    <body>
-        <div id="wg-api-football-games" 
-             data-host="v3.football.api-sports.io" 
-             data-key="cbb78730aad99ef987ad89e3272ab08d" 
-             data-theme="dark" 
-             data-refresh="15" 
-             data-show-errors="true" 
-             data-show-logos="true"
-             data-timezone="America/Los_Angeles">
-        </div>
-    </body>
-    </html>
+    <div id="wg-api-football-games" 
+         data-host="v3.football.api-sports.io" 
+         data-key="cbb78730aad99ef987ad89e3272ab08d" 
+         data-theme="dark" 
+         data-refresh="15" 
+         data-show-errors="true" 
+         data-show-logos="true"
+         data-timezone="America/Los_Angeles">
+    </div>
+    <script type="module" src="https://widgets.api-sports.io/2.0.3/widgets.js"></script>
+    <style>
+        body { background-color: transparent !important; margin: 0; }
+    </style>
     """
     
-    # Aumentamos la altura a 800 para dar espacio a que cargue
-    components.html(api_sports_html, height=800, scrolling=True)
+    # Aumentamos un poco más la altura por si el widget es largo
+    components.html(api_sports_html, height=1000, scrolling=True)
 
 with tab_calculadora:
     col_izq, col_der = st.columns([1, 1])
@@ -72,7 +68,6 @@ with tab_calculadora:
         st.metric("Cobro Potencial", f"${total:.2f}", f"+${utilidad:.2f} Neto")
         
         if st.button("💾 REGISTRAR Y COPIAR"):
-            resumen = f"📌 PICK: {nombre} | Momio: {momio} | Inversión: ${monto} | Cobro: ${total:.2f}"
             st.session_state.bitacora.append({
                 "Fecha": datetime.now().strftime("%H:%M"),
                 "Evento": nombre,
@@ -80,8 +75,8 @@ with tab_calculadora:
                 "Momio": momio,
                 "Ganancia_Pot": utilidad
             })
-            st.code(resumen)
-            st.toast("Guardado!")
+            st.code(f"📌 PICK: {nombre} | Momio: {momio} | Cobro: ${total:.2f}")
+            st.toast("¡Registrado!")
 
 with tab_analisis:
     if st.session_state.bitacora:
@@ -89,7 +84,7 @@ with tab_analisis:
         st.area_chart(df, x="Fecha", y="Ganancia_Pot", color="#00ffcc")
         st.dataframe(df, use_container_width=True)
     else:
-        st.info("Registra jugadas para ver el gráfico.")
+        st.info("No hay datos en la bitácora.")
 
 st.divider()
-st.caption("Ludoteca Nacional v6.6 | Fix de Widget Aplicado")
+st.caption("Ludoteca Nacional v6.7 | Timezone: America/Los_Angeles")
